@@ -43,7 +43,7 @@ col1, col2, col3 = st.columns(3)
 with col1:
     principal = st.number_input('Principal amount', min_value=0, value=100000, step=1)
 with col2:  
-    interes_rate = st.number_input('Interest rate', min_value=0.000, value=0.050, step=0.001)
+    interes_rate = st.number_input('Interest rate', min_value=0.00, value=10.00, step=0.25)/100
 with col3:
     term = st.number_input('Term (in months)', min_value=0, value=120, step=1)
 
