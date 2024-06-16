@@ -1,40 +1,75 @@
-import altair as alt
-import numpy as np
-import pandas as pd
 import streamlit as st
+import pandas as pd
+import plotly.express as px
+template = 'plotly'
 
-"""
-# Welcome to Streamlit!
+# Function to calculate loan data
+def loan_amount(principal, rate, term):
+    # Calculate monthly interest rate
+    monthly_rate = rate / 12
+    # Calculate monthly payment using the formula assuming linear payments
+    monthly_payment = (principal * monthly_rate) / (1 - (1 + monthly_rate) ** (-term))
+    # Initialize remaining principal and total amount
+    remaining_principal = principal
+    total_amount = 0
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:.
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+    # Initialize data frame
+    data = pd.DataFrame()
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+    # Iterate over loan term and calculate some values for each month
+    for month in range(1, term + 1):
+        # Calculate interest amount
+        interest_amount = remaining_principal * monthly_rate
+        # Calculate principal amount
+        principal_amount = monthly_payment - interest_amount
+        # Update remaining principal and total amount
+        remaining_principal = remaining_principal - principal_amount
+        total_amount = total_amount + monthly_payment
+        # Print the result
+        data_one_iter = pd.DataFrame({
+            'month': [month],
+            'monthly_payment': [monthly_payment],
+            'interest_amount': [interest_amount],
+            'remaining_principal': [remaining_principal],
+            'total_amount': [total_amount]})
+        data = pd.concat([data, data_one_iter], ignore_index=True)
+    data['interest_monthly_ratio'] = data['interest_amount'] / data['monthly_payment']
+    
+    return data, total_amount
 
-num_points = st.slider("Number of points in spiral", 1, 10000, 1100)
-num_turns = st.slider("Number of turns in spiral", 1, 300, 31)
+st.title('Calculate Loan - Dashboard')
 
-indices = np.linspace(0, 1, num_points)
-theta = 2 * np.pi * num_turns * indices
-radius = indices
+col1, col2, col3 = st.columns(3)
 
-x = radius * np.cos(theta)
-y = radius * np.sin(theta)
+with col1:
+    principal = st.number_input('Principal amount', min_value=0, value=100000, step=1)
+with col2:  
+    interes_rate = st.number_input('Interest rate', min_value=0.000, value=0.050, step=0.001)
+with col3:
+    term = st.number_input('Term (in months)', min_value=0, value=120, step=1)
 
-df = pd.DataFrame({
-    "x": x,
-    "y": y,
-    "idx": indices,
-    "rand": np.random.randn(num_points),
-})
+data, total_amount = loan_amount(principal, interes_rate, term)
 
-st.altair_chart(alt.Chart(df, height=700, width=700)
-    .mark_point(filled=True)
-    .encode(
-        x=alt.X("x", axis=None),
-        y=alt.Y("y", axis=None),
-        color=alt.Color("idx", legend=None, scale=alt.Scale()),
-        size=alt.Size("rand", legend=None, scale=alt.Scale(range=[1, 150])),
-    ))
+# create a line graph with x axis as month and y axis as remaining principal
+fig_remining_principal = px.line(data, x='month', y='remaining_principal', template=template)
+fig_interest_payed = px.line(data, x='month', y=['interest_amount', 'monthly_payment'], template=template)
+fig_interest_payment_ratio = px.line(data, x='month', y='interest_monthly_ratio', template=template)
+
+st.write('Monthly installment: ', round(data['monthly_payment'][0]))
+st.write('Total amount payed at the end of the loan period: ', round(total_amount))
+
+show_brake_down = st.checkbox('Show loan breakdown per month')
+if show_brake_down:
+    st.markdown('## Loan breakdown per month')
+    st.dataframe(data)
+    # create download button with streamlit, donload the data frame as csv file
+    st.download_button(label='Download data', data=data.to_csv(index=False), file_name='loan_breakdown.csv', mime='text/csv')
+
+st.markdown('## Remaining principal over time')
+st.plotly_chart(fig_remining_principal, theme=None)
+
+st.markdown('## Monthly installment breakdown per month over time')
+st.plotly_chart(fig_interest_payed, theme=None)
+
+st.markdown('## Interest / monthly payment instalment over time')
+st.plotly_chart(fig_interest_payment_ratio, theme=None)
