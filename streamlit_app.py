@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
-template = 'plotly'
+
 
 # Function to calculate loan data
 def loan_amount(principal, rate, term):
@@ -50,26 +49,4 @@ with col3:
 
 data, total_amount = loan_amount(principal, interes_rate, term)
 
-# create a line graph with x axis as month and y axis as remaining principal
-fig_remining_principal = px.line(data, x='month', y='remaining_principal', template=template)
-fig_interest_payed = px.line(data, x='month', y=['interest_amount', 'monthly_payment'], template=template)
-fig_interest_payment_ratio = px.line(data, x='month', y='interest_monthly_ratio', template=template)
 
-st.write('Monthly installment: ', round(data['monthly_payment'][0]))
-st.write('Total amount payed at the end of the loan period: ', round(total_amount))
-
-show_brake_down = st.checkbox('Show loan breakdown per month')
-if show_brake_down:
-    st.markdown('## Loan breakdown per month')
-    st.dataframe(data)
-    # create download button with streamlit, donload the data frame as csv file
-    st.download_button(label='Download data', data=data.to_csv(index=False), file_name='loan_breakdown.csv', mime='text/csv')
-
-st.markdown('## Remaining principal over time')
-st.plotly_chart(fig_remining_principal, theme=None)
-
-st.markdown('## Monthly installment breakdown per month over time')
-st.plotly_chart(fig_interest_payed, theme=None)
-
-st.markdown('## Interest / monthly payment instalment over time')
-st.plotly_chart(fig_interest_payment_ratio, theme=None)
