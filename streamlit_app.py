@@ -50,3 +50,6 @@ with col3:
 data, total_amount = loan_amount(principal, interes_rate, term)
 
 
+st.write('Monthly installment: ', round(data['monthly_payment'][0]))
+st.write('Total amount payed at the end of the loan period: ', round(total_amount))
+
