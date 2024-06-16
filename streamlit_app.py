@@ -43,9 +43,9 @@ col1, col2, col3 = st.columns(3)
 with col1:
     principal = st.number_input('Principal amount', min_value=0, value=100000, step=1)
 with col2:  
-    interes_rate = st.number_input('Interest rate', min_value=0.00, value=10.00, step=0.25)/100
+    interes_rate = st.number_input('Interest rate', min_value=0.00, value=5.00, step=0.25)/100
 with col3:
-    term = st.number_input('Term (in months)', min_value=0, value=120, step=1)
+    term = st.number_input('Term (in years)', min_value=0, value=30, step=1)/12
 
 data, total_amount = loan_amount(principal, interes_rate, term)
 
