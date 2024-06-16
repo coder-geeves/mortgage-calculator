@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 
-
 # Function to calculate loan data
 def loan_amount(principal, rate, term):
     # Calculate monthly interest rate
@@ -36,8 +35,6 @@ def loan_amount(principal, rate, term):
     
     return data, total_amount
 
-st.title('Calculate Loan - Dashboard')
-
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -45,11 +42,9 @@ with col1:
 with col2:  
     interes_rate = st.number_input('Interest rate', min_value=0.00, value=5.00, step=0.25)/100
 with col3:
-    term = st.number_input('Term (in years)', min_value=0, value=30, step=1)*12
-    
+    term = st.number_input('Term (in years)', min_value=0, value=30, step=1)*12  
 
 data, total_amount = loan_amount(principal, interes_rate, term)
-
 
 st.write('Monthly installment: ', round(data['monthly_payment'][0]))
 st.write('Total amount payed at the end of the loan period: ', round(total_amount))
